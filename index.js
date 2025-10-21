@@ -32,6 +32,8 @@ app.post("/cadastrar", async (req,res) => {
         console.log(erro)
     }
 })
+
+
 app.post("/login", async (req, res)=>{
     const login = req.body;
     if(login.email == null){
@@ -40,9 +42,27 @@ app.post("/login", async (req, res)=>{
     if(login.senha == null) {
         return res.status(400).json({erro: "informe a senha"})
     }
-    return res.status(200).json({res: "login recebido"})
     // 21/10-consultar o email no banco de dados
-})
+    
+  try {
+    const [resultado] = await db.pool.query(
+        "select id_cliente, nome, email,senha FROM cliente WHERE email =?",
+        [login.email]
+    );
+
+    if (resultado.length === 0) {
+        return res.status(404).json({erro: "E-mail não encontrado"});
+  }
+  return res.status(200).json({res:"Login realizado"})
+     
+    } catch (erro) {
+      console.log(erro);
+      return res.status(500).json({ erro: "Login não encontrado" });
+    }
+   
+  });
+
+    
 
 
 app.get("/clientes", async (req,res) => {
